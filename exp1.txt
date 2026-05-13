@@ -1,0 +1,1134 @@
+
+
+    # ============================================
+    # COMPLETE NLP PRACTICAL SETUP FOR JUPYTER
+    # ============================================
+
+    # Install Required Libraries
+    !pip install nltk spacy pandas -q
+
+    # --------------------------------------------
+    # Download NLTK Resources
+    # --------------------------------------------
+
+    import nltk
+
+    nltk.download('punkt')
+    nltk.download('stopwords')
+    nltk.download('averaged_perceptron_tagger')
+    nltk.download('wordnet')
+    nltk.download('omw-1.4')
+    nltk.download('senseval')
+
+    # --------------------------------------------
+    # Download spaCy English Model
+    # --------------------------------------------
+
+    !python -m spacy download en_core_web_sm
+
+    print("\nALL INSTALLATIONS AND DOWNLOADS COMPLETED SUCCESSFULLY")
+
+    # Experiment 1
+
+    import nltk
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.stem import PorterStemmer
+
+    text = """
+    Dear Customer, your payment has been successfully completed.
+    Please contact support for further assistance.
+    """
+
+    # Tokenization
+    tokens = word_tokenize(text)
+    print("Tokens:")
+    print(tokens)
+
+    # Stop-word Removal
+    stop_words = set(stopwords.words('english'))
+    filtered = [word for word in tokens if word.lower() not in stop_words]
+
+    print("\nAfter Stop-word Removal:")
+    print(filtered)
+
+    # Stemming
+    ps = PorterStemmer()
+    stemmed = [ps.stem(word) for word in filtered]
+
+    print("\nStemmed Words:")
+    print(stemmed)
+
+    # POS Tagging
+    pos_tags = nltk.pos_tag(filtered)
+
+    print("\nPOS Tags:")
+    print(pos_tags)
+
+    Tokens:
+    ['Dear', 'Customer', ',', 'your', 'payment', 'has', 'been', 'successfully', 'completed', '.', 'Please', 'contact', 'support', 'for', 'further', 'assistance', '.']
+
+    After Stop-word Removal:
+    ['Dear', 'Customer', ',', 'payment', 'successfully', 'completed', '.', 'Please', 'contact', 'support', 'assistance', '.']
+
+    Stemmed Words:
+    ['dear', 'custom', ',', 'payment', 'success', 'complet', '.', 'pleas', 'contact', 'support', 'assist', '.']
+
+    POS Tags:
+    [('Dear', 'NNP'), ('Customer', 'NNP'), (',', ','), ('payment', 'NN'), ('successfully', 'RB'), ('completed', 'VBN'), ('.', '.'), ('Please', 'NNP'), ('contact', 'JJ'), ('support', 'NN'), ('assistance', 'NN'), ('.', '.')]
+
+    # Experiment 2
+
+    import nltk
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.stem import WordNetLemmatizer
+
+    text = """
+    Books are the best source of knowledge and learning.
+    Students read books regularly in libraries.
+    """
+
+    # Tokenization
+    tokens = word_tokenize(text)
+    print("Tokens:")
+    print(tokens)
+
+    # Stop-word Removal
+    stop_words = set(stopwords.words('english'))
+    filtered = [word for word in tokens if word.lower() not in stop_words]
+
+    print("\nAfter Stop-word Removal:")
+    print(filtered)
+
+    # Lemmatization
+    lemmatizer = WordNetLemmatizer()
+    lemmatized = [lemmatizer.lemmatize(word) for word in filtered]
+
+    print("\nLemmatized Words:")
+    print(lemmatized)
+
+    # POS Tagging
+    pos = nltk.pos_tag(lemmatized)
+
+    print("\nPOS Tags:")
+    print(pos)
+
+    Tokens:
+    ['Books', 'are', 'the', 'best', 'source', 'of', 'knowledge', 'and', 'learning', '.', 'Students', 'read', 'books', 'regularly', 'in', 'libraries', '.']
+
+    After Stop-word Removal:
+    ['Books', 'best', 'source', 'knowledge', 'learning', '.', 'Students', 'read', 'books', 'regularly', 'libraries', '.']
+
+    Lemmatized Words:
+    ['Books', 'best', 'source', 'knowledge', 'learning', '.', 'Students', 'read', 'book', 'regularly', 'library', '.']
+
+    POS Tags:
+    [('Books', 'NNP'), ('best', 'JJS'), ('source', 'NN'), ('knowledge', 'NN'), ('learning', 'NN'), ('.', '.'), ('Students', 'NNS'), ('read', 'VBP'), ('book', 'NN'), ('regularly', 'RB'), ('library', 'JJ'), ('.', '.')]
+
+    # EXPERIMENT 3
+    # Morphological Analyzer and Word Generator
+
+    # Import Libraries
+    import nltk
+    import spacy
+
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.stem import WordNetLemmatizer
+    from nltk.corpus import wordnet
+
+    # Load spaCy English model
+    nlp = spacy.load("en_core_web_sm")
+
+    lemmatizer = WordNetLemmatizer()
+
+    # ------------------------------------------------
+    # POS Mapping Function
+    # ------------------------------------------------
+
+    def get_pos(tag):
+
+        if tag.startswith('J'):
+            return wordnet.ADJ
+
+        elif tag.startswith('V'):
+            return wordnet.VERB
+
+        elif tag.startswith('N'):
+            return wordnet.NOUN
+
+        elif tag.startswith('R'):
+            return wordnet.ADV
+
+        return wordnet.NOUN
+
+    # ------------------------------------------------
+    # Morphological Feature Extraction
+    # ------------------------------------------------
+
+    def extract_features(word, pos):
+
+        features = []
+
+        # Noun Features
+        if pos.startswith('N'):
+
+            features.append("Noun")
+
+            if word.endswith('s'):
+                features.append("Plural")
+
+            else:
+                features.append("Singular")
+
+        # Verb Features
+        elif pos.startswith('V'):
+
+            features.append("Verb")
+
+            if pos == 'VBD':
+                features.append("Past Tense")
+
+            elif pos == 'VBG':
+                features.append("Present Continuous")
+
+            elif pos in ['VB', 'VBP']:
+                features.append("Present Tense")
+
+        # Adjective Features
+        elif pos.startswith('J'):
+            features.append("Adjective")
+
+        # Adverb Features
+        elif pos.startswith('R'):
+            features.append("Adverb")
+
+        else:
+            features.append("Other")
+
+        return ", ".join(features)
+
+    # ------------------------------------------------
+    # PART A
+    # Tokenization and Stop-word Removal
+    # ------------------------------------------------
+
+    text = """
+    Users are chatting with the intelligent chatbot and asking questions.
+    The chatbot is responding quickly and helping users efficiently.
+    """
+
+    # Tokenization
+    tokens = word_tokenize(text.lower())
+
+    print("\nTOKENS")
+    print("-" * 60)
+    print(tokens)
+
+    # Stop-word Removal
+    stop_words = set(stopwords.words('english'))
+
+    filtered_words = [word for word in tokens
+                      if word not in stop_words and word.isalpha()]
+
+    print("\nAFTER STOP-WORD REMOVAL")
+    print("-" * 60)
+    print(filtered_words)
+
+    # ------------------------------------------------
+    # PART B
+    # Morphological Analysis
+    # ------------------------------------------------
+
+    print("\nMORPHOLOGICAL ANALYSIS")
+    print("-" * 80)
+
+    # POS Tagging
+    pos_tags = nltk.pos_tag(filtered_words)
+
+    # Table Heading
+    print("{:<15}{:<15}{}".format("Word", "Root", "Features"))
+    print("-" * 80)
+
+    # Processing
+    for word, pos in pos_tags:
+
+        root = lemmatizer.lemmatize(word, get_pos(pos))
+
+        features = extract_features(word, pos)
+
+        print("{:<15}{:<15}{}".format(word, root, features))
+
+    # ------------------------------------------------
+    # PART C
+    # Word Generation
+    # ------------------------------------------------
+
+    print("\nWORD GENERATION")
+    print("-" * 80)
+
+    root_word = input("Enter root word: ").lower()
+
+    category = input("Enter category (noun/verb/adjective): ").lower()
+
+    feature = input("""
+    Enter feature:
+    For noun      -> plural
+    For verb      -> past/present/ing
+    For adjective -> comparative/superlative
+    : """).lower()
+
+    generated_word = root_word
+
+    # ------------------------------------------------
+    # Noun Rules
+    # ------------------------------------------------
+
+    if category == "noun":
+
+        if feature == "plural":
+
+            if root_word.endswith('y'):
+                generated_word = root_word[:-1] + "ies"
+
+            elif root_word.endswith(('s', 'x', 'z', 'ch', 'sh')):
+                generated_word = root_word + "es"
+
+            else:
+                generated_word = root_word + "s"
+
+    # ------------------------------------------------
+    # Verb Rules
+    # ------------------------------------------------
+
+    elif category == "verb":
+
+        if feature == "past":
+
+            if root_word.endswith('e'):
+                generated_word = root_word + "d"
+
+            else:
+                generated_word = root_word + "ed"
+
+        elif feature == "present":
+            generated_word = root_word + "s"
+
+        elif feature == "ing":
+
+            if root_word.endswith('e'):
+                generated_word = root_word[:-1] + "ing"
+
+            else:
+                generated_word = root_word + "ing"
+
+    # ------------------------------------------------
+    # Adjective Rules
+    # ------------------------------------------------
+
+    elif category == "adjective":
+
+        if feature == "comparative":
+            generated_word = "more " + root_word
+
+        elif feature == "superlative":
+            generated_word = "most " + root_word
+
+    # ------------------------------------------------
+    # Output
+    # ------------------------------------------------
+
+    print("\nGENERATED WORD FORM")
+    print("-" * 80)
+    print(generated_word)
+
+
+    TOKENS
+    ------------------------------------------------------------
+    ['users', 'are', 'chatting', 'with', 'the', 'intelligent', 'chatbot', 'and', 'asking', 'questions', '.', 'the', 'chatbot', 'is', 'responding', 'quickly', 'and', 'helping', 'users', 'efficiently', '.']
+
+    AFTER STOP-WORD REMOVAL
+    ------------------------------------------------------------
+    ['users', 'chatting', 'intelligent', 'chatbot', 'asking', 'questions', 'chatbot', 'responding', 'quickly', 'helping', 'users', 'efficiently']
+
+    MORPHOLOGICAL ANALYSIS
+    --------------------------------------------------------------------------------
+    Word           Root           Features
+    --------------------------------------------------------------------------------
+    users          user           Noun, Plural
+    chatting       chat           Verb, Present Continuous
+    intelligent    intelligent    Adjective
+    chatbot        chatbot        Noun, Singular
+    asking         ask            Verb, Present Continuous
+    questions      question       Noun, Plural
+    chatbot        chatbot        Verb, Present Tense
+    responding     respond        Verb, Present Continuous
+    quickly        quickly        Adverb
+    helping        help           Verb, Present Continuous
+    users          user           Noun, Plural
+    efficiently    efficiently    Adverb
+
+    WORD GENERATION
+    --------------------------------------------------------------------------------
+
+    Enter root word:  play
+    Enter category (noun/verb/adjective):  verb
+
+    Enter feature:
+    For noun      -> plural
+    For verb      -> past/present/ing
+    For adjective -> comparative/superlative
+    :  ing
+
+
+    GENERATED WORD FORM
+    --------------------------------------------------------------------------------
+    playing
+
+    # Experiment 4
+    # Text Analytics System for Product Reviews
+
+    # Import Libraries
+    import nltk
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.util import ngrams
+    from collections import Counter
+
+    # Small Corpus (Product Reviews)
+    text = """
+    This mobile phone has excellent battery life and amazing camera quality.
+    This mobile phone has good battery life.
+    Amazing camera quality makes this mobile phone excellent.
+    """
+
+    # ---------------------------------
+    # Tokenization
+    # ---------------------------------
+
+    tokens = word_tokenize(text.lower())
+    print("Tokens: ")
+    print(tokens)
+
+    # ---------------------------------
+    # Stop-word Removal + Filtration
+    # ---------------------------------
+
+    stop_words = set(stopwords.words('english'))
+
+    filtered = [word for word in tokens
+                if word.isalpha() and word not in stop_words]
+
+    print("\nFiltered Words:")
+    print(filtered)
+
+    # ---------------------------------
+    # Unigram Generation
+    # ---------------------------------
+
+    unigrams = list(ngrams(filtered, 1))
+    uni_count = Counter(unigrams)
+
+    print("\nUNIGRAMS WITH COUNT")
+    print("-" * 40)
+
+    for pattern, count in uni_count.items():
+        print(f"{pattern!s:15}  -->  {count}")
+
+    # ---------------------------------
+    # Bigram Generation
+    # ---------------------------------
+
+    bigrams = list(ngrams(filtered, 2))
+    bi_count = Counter(bigrams)
+
+    print("\nBIGRAMS WITH COUNT")
+    print("-" * 40)
+
+    for pattern, count in bi_count.items():
+        print(f"{pattern!s:<25}  -->  {count}")
+
+    # ---------------------------------
+    # Trigram Generation
+    # ---------------------------------
+
+    trigrams = list(ngrams(filtered, 3))
+    tri_count = Counter(trigrams)
+
+    print("\nTRIGRAMS WITH COUNT")
+    print("-" * 40)
+
+    for pattern, count in tri_count.items():
+        print(f"{pattern!s:<35}  -->  {count}")
+
+    Tokens: 
+    ['this', 'mobile', 'phone', 'has', 'excellent', 'battery', 'life', 'and', 'amazing', 'camera', 'quality', '.', 'this', 'mobile', 'phone', 'has', 'good', 'battery', 'life', '.', 'amazing', 'camera', 'quality', 'makes', 'this', 'mobile', 'phone', 'excellent', '.']
+
+    Filtered Words:
+    ['mobile', 'phone', 'excellent', 'battery', 'life', 'amazing', 'camera', 'quality', 'mobile', 'phone', 'good', 'battery', 'life', 'amazing', 'camera', 'quality', 'makes', 'mobile', 'phone', 'excellent']
+
+    UNIGRAMS WITH COUNT
+    ----------------------------------------
+    ('mobile',)      -->  3
+    ('phone',)       -->  3
+    ('excellent',)   -->  2
+    ('battery',)     -->  2
+    ('life',)        -->  2
+    ('amazing',)     -->  2
+    ('camera',)      -->  2
+    ('quality',)     -->  2
+    ('good',)        -->  1
+    ('makes',)       -->  1
+
+    BIGRAMS WITH COUNT
+    ----------------------------------------
+    ('mobile', 'phone')        -->  3
+    ('phone', 'excellent')     -->  2
+    ('excellent', 'battery')   -->  1
+    ('battery', 'life')        -->  2
+    ('life', 'amazing')        -->  2
+    ('amazing', 'camera')      -->  2
+    ('camera', 'quality')      -->  2
+    ('quality', 'mobile')      -->  1
+    ('phone', 'good')          -->  1
+    ('good', 'battery')        -->  1
+    ('quality', 'makes')       -->  1
+    ('makes', 'mobile')        -->  1
+
+    TRIGRAMS WITH COUNT
+    ----------------------------------------
+    ('mobile', 'phone', 'excellent')     -->  2
+    ('phone', 'excellent', 'battery')    -->  1
+    ('excellent', 'battery', 'life')     -->  1
+    ('battery', 'life', 'amazing')       -->  2
+    ('life', 'amazing', 'camera')        -->  2
+    ('amazing', 'camera', 'quality')     -->  2
+    ('camera', 'quality', 'mobile')      -->  1
+    ('quality', 'mobile', 'phone')       -->  1
+    ('mobile', 'phone', 'good')          -->  1
+    ('phone', 'good', 'battery')         -->  1
+    ('good', 'battery', 'life')          -->  1
+    ('camera', 'quality', 'makes')       -->  1
+    ('quality', 'makes', 'mobile')       -->  1
+    ('makes', 'mobile', 'phone')         -->  1
+
+    # Experiment 5
+    # Spell Checking using Edit Distance
+
+    import pandas as pd
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.stem import PorterStemmer
+
+    text = input("Enter sentence: ")
+
+    # ---------------------------------
+    # (a) Tokenization and Stop-word Removal
+    # ---------------------------------
+
+    tokens = word_tokenize(text.lower())
+
+    stop_words = set(stopwords.words('english'))
+
+    filtered_tokens = [word for word in tokens
+                       if word.isalnum() and word not in stop_words]
+
+    print("\nFiltered Tokens:")
+    print(filtered_tokens)
+
+    # ---------------------------------
+    # (b) Stemming
+    # ---------------------------------
+
+    stemmer = PorterStemmer()
+
+    stemmed_words = [stemmer.stem(word) for word in filtered_tokens]
+
+    print("\nStemmed Words:")
+    print(stemmed_words)
+
+    # ---------------------------------
+    # (c) Edit Distance with Matrix
+    # ---------------------------------
+
+    def edit_distance(word1, word2):
+
+        m = len(word1)
+        n = len(word2)
+
+        dp = [[0 for j in range(n + 1)] for i in range(m + 1)]
+
+        # Initialize Matrix
+        for i in range(m + 1):
+            dp[i][0] = i
+
+        for j in range(n + 1):
+            dp[0][j] = j
+
+        # Fill Matrix
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+
+                if word1[i - 1] == word2[j - 1]:
+                    cost = 0
+                else:
+                    cost = 1
+
+                dp[i][j] = min(
+                    dp[i - 1][j] + 1,      # Deletion
+                    dp[i][j - 1] + 1,      # Insertion
+                    dp[i - 1][j - 1] + cost  # Substitution
+                )
+
+        return dp
+
+    # Input Words
+    word1 = input("\nEnter misspelled word: ")
+    word2 = input("Enter correct word suggestion: ")
+
+    # Compute Matrix
+    matrix = edit_distance(word1, word2)
+
+    # Distance
+    distance = matrix[-1][-1]
+
+    # ---------------------------------
+    # Proper Matrix Display
+    # ---------------------------------
+
+    print("\nEDIT DISTANCE MATRIX")
+    print("-" * 50)
+
+    df = pd.DataFrame(
+        matrix,
+        index=[" "] + list(word1),
+        columns=[" "] + list(word2)
+    )
+
+    print(df)
+
+    # ---------------------------------
+    # Final Distance
+    # ---------------------------------
+
+    print("\nEdit Distance =", distance)
+
+    Enter sentence:  The student submitted the assignmnt before deadline.
+
+
+    Filtered Tokens:
+    ['student', 'submitted', 'assignmnt', 'deadline']
+
+    Stemmed Words:
+    ['student', 'submit', 'assignmnt', 'deadlin']
+
+
+    Enter misspelled word:  assigmnt
+    Enter correct word suggestion:  assignment
+
+
+    EDIT DISTANCE MATRIX
+    --------------------------------------------------
+          a  s  s  i  g  n  m  e  n   t
+       0  1  2  3  4  5  6  7  8  9  10
+    a  1  0  1  2  3  4  5  6  7  8   9
+    s  2  1  0  1  2  3  4  5  6  7   8
+    s  3  2  1  0  1  2  3  4  5  6   7
+    i  4  3  2  1  0  1  2  3  4  5   6
+    g  5  4  3  2  1  0  1  2  3  4   5
+    m  6  5  4  3  2  1  1  1  2  3   4
+    n  7  6  5  4  3  2  1  2  2  2   3
+    t  8  7  6  5  4  3  2  2  3  3   2
+
+    Edit Distance = 2
+
+    # EXPERIMENT 6
+    # Resume Information Extraction using NER
+
+    # Import Libraries
+    import nltk
+    import spacy
+
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from nltk.stem import WordNetLemmatizer
+
+    # Load spaCy English Model
+    nlp = spacy.load("en_core_web_sm")
+
+    lemmatizer = WordNetLemmatizer()
+
+    # ------------------------------------------------
+    # Resume Text
+    # ------------------------------------------------
+
+    resume_text = """
+    Rahul Sharma is a Data Scientist from Mumbai.
+
+    He worked at TCS and Infosys.
+
+    He has skills in Python, Machine Learning, SQL, and NLP.
+
+    He completed his degree from Mumbai University.
+    """
+
+    # ------------------------------------------------
+    # (a) Tokenization
+    # ------------------------------------------------
+
+    tokens = word_tokenize(resume_text.lower())
+
+    print("TOKENS")
+    print("-" * 70)
+    print(tokens)
+
+    # ------------------------------------------------
+    # Stop-word Removal
+    # ------------------------------------------------
+
+    stop_words = set(stopwords.words('english'))
+
+    filtered_words = [word for word in tokens
+                      if word.isalpha() and word not in stop_words]
+
+    print("\nAFTER STOP-WORD REMOVAL")
+    print("-" * 70)
+    print(filtered_words)
+
+    # ------------------------------------------------
+    # (b) Lemmatization
+    # ------------------------------------------------
+
+    lemmatized_words = [lemmatizer.lemmatize(word)
+                        for word in filtered_words]
+
+    print("\nLEMMATIZED WORDS")
+    print("-" * 70)
+    print(lemmatized_words)
+
+    # ------------------------------------------------
+    # (c) Named Entity Recognition (NER)
+    # ------------------------------------------------
+
+    print("\nNAMED ENTITY RECOGNITION")
+    print("-" * 70)
+
+    doc = nlp(resume_text)
+
+    # Lists for extracted information
+    names = []
+    organizations = []
+    locations = []
+
+    # Extract Entities
+    for ent in doc.ents:
+
+        if ent.label_ == "PERSON":
+            names.append(ent.text)
+
+        elif ent.label_ == "ORG":
+            organizations.append(ent.text)
+
+        elif ent.label_ in ["GPE", "LOC"]:
+            locations.append(ent.text)
+
+    # ------------------------------------------------
+    # Skill Extraction
+    # ------------------------------------------------
+
+    skills_list = [
+        "python",
+        "machine learning",
+        "sql",
+        "nlp",
+        "java",
+        "data science",
+        "deep learning"
+    ]
+
+    skills_found = []
+
+    resume_lower = resume_text.lower()
+
+    for skill in skills_list:
+
+        if skill in resume_lower:
+            skills_found.append(skill)
+
+    # ------------------------------------------------
+    # Display Extracted Information
+    # ------------------------------------------------
+
+    print(f"{'Candidate Names':<25}: {set(names)}")
+    print(f"{'Organizations':<25}: {set(organizations)}")
+    print(f"{'Locations':<25}: {set(locations)}")
+    print(f"{'Skills':<25}: {set(skills_found)}")
+
+    TOKENS
+    ----------------------------------------------------------------------
+    ['rahul', 'sharma', 'is', 'a', 'data', 'scientist', 'from', 'mumbai', '.', 'he', 'worked', 'at', 'tcs', 'and', 'infosys', '.', 'he', 'has', 'skills', 'in', 'python', ',', 'machine', 'learning', ',', 'sql', ',', 'and', 'nlp', '.', 'he', 'completed', 'his', 'degree', 'from', 'mumbai', 'university', '.']
+
+    AFTER STOP-WORD REMOVAL
+    ----------------------------------------------------------------------
+    ['rahul', 'sharma', 'data', 'scientist', 'mumbai', 'worked', 'tcs', 'infosys', 'skills', 'python', 'machine', 'learning', 'sql', 'nlp', 'completed', 'degree', 'mumbai', 'university']
+
+    LEMMATIZED WORDS
+    ----------------------------------------------------------------------
+    ['rahul', 'sharma', 'data', 'scientist', 'mumbai', 'worked', 'tc', 'infosys', 'skill', 'python', 'machine', 'learning', 'sql', 'nlp', 'completed', 'degree', 'mumbai', 'university']
+
+    NAMED ENTITY RECOGNITION
+    ----------------------------------------------------------------------
+    Candidate Names          : {'Rahul Sharma'}
+    Organizations            : {'Mumbai University', 'SQL', 'TCS', 'Python, Machine Learning', 'NLP', 'Infosys', 'Data Scientist'}
+    Locations                : {'Mumbai'}
+    Skills                   : {'machine learning', 'python', 'sql', 'nlp'}
+
+    # EXPERIMENT 7 ## Corrected
+
+    import nltk
+    from nltk.tokenize import word_tokenize, sent_tokenize
+    from nltk.corpus import stopwords
+    from nltk.stem import PorterStemmer
+    from nltk.util import bigrams
+    from collections import Counter
+
+    text = """
+    I love natural language processing.
+    I love machine learning.
+    Machine learning is very useful.
+    Natural language processing is interesting.
+    I enjoy learning NLP concepts.
+    I love learning new things.
+    """
+
+    # Tokenization
+    tokens = word_tokenize(text.lower())
+
+    print("TOKENS")
+    print("-" * 70)
+    print(tokens)
+
+    # Stop-word Removal
+    stop_words = set(stopwords.words('english'))
+
+    filtered_words = [word for word in tokens
+                      if word.isalpha() and word not in stop_words]
+
+    print("\nAFTER STOP-WORD REMOVAL")
+    print("-" * 70)
+    print(filtered_words)
+
+    # Stemming
+    stemmer = PorterStemmer()
+
+    stemmed_words = [stemmer.stem(word)
+                     for word in filtered_words]
+
+    print("\nSTEMMED WORDS")
+    print("-" * 70)
+    print(stemmed_words)
+
+    # Sentence-wise Bigram Generation
+    all_bigrams = []
+
+    sentences = sent_tokenize(text.lower())
+
+    for sentence in sentences:
+
+        sentence_tokens = word_tokenize(sentence)
+
+        sentence_filtered = [word for word in sentence_tokens
+                             if word.isalpha() and word not in stop_words]
+
+        sentence_bigrams = list(bigrams(sentence_filtered))
+
+        all_bigrams.extend(sentence_bigrams)
+
+    print("\nBIGRAMS")
+    print("-" * 70)
+
+    for bg in all_bigrams:
+        print(bg)
+
+    # Bigram Frequency Count
+    bigram_counts = Counter(all_bigrams)
+
+    # Word Frequency
+    word_counts = Counter(filtered_words)
+
+    # Bigram Probability
+    print("\nBIGRAM PROBABILITIES")
+    print("-" * 70)
+
+    bigram_prob = {}
+
+    for (w1, w2), count in bigram_counts.items():
+
+        probability = count / word_counts[w1]
+
+        bigram_prob[(w1, w2)] = probability
+
+        print(f"P({w2} | {w1}) = {count}/{word_counts[w1]} = {probability:.2f}")
+
+
+    # Next Word Prediction-
+
+    print("\nNEXT WORD PREDICTION")
+    print("-" * 70)
+
+    input_word = input("Enter a word: ").lower().strip()
+
+    suggestions = []
+
+    for (w1, w2), prob in bigram_prob.items():
+
+        if w1 == input_word:
+            suggestions.append((w2, prob))
+
+    # Sort by Probability
+    suggestions = sorted(suggestions,
+                         key=lambda x: x[1],
+                         reverse=True)
+
+    # Display Suggestions
+    if suggestions:
+
+        print(f"\nSuggested next words for '{input_word}':\n")
+
+        for word, prob in suggestions:
+            print(f"{word:<20} Probability = {prob:.2f}")
+
+    else:
+        print("No suggestions found.")
+
+    # Sentence Probability Estimation
+
+    print("\nSENTENCE PROBABILITY")
+    print("-" * 70)
+
+    sentence = input("Enter a sentence: ").lower()
+
+    sentence_tokens = word_tokenize(sentence)
+
+    sentence_tokens = [word for word in sentence_tokens
+                       if word.isalpha() and word not in stop_words]
+
+    sentence_bigrams = list(bigrams(sentence_tokens))
+
+    probability = 1
+
+    for bg in sentence_bigrams:
+
+        if bg in bigram_prob:
+            probability *= bigram_prob[bg]
+        else:
+            probability *= 0.0001
+
+    print(f"\nEstimated Sentence Probability = {probability:.8f}")
+
+    # EXPERIMENT 8
+    # Word Sense Disambiguation using Naive Bayes Classifier
+
+    # Import Libraries
+    import nltk
+
+    from nltk.corpus import senseval
+    from nltk.classify import NaiveBayesClassifier
+    from nltk.classify import accuracy
+
+    # ------------------------------------------------
+    # Download Corpus (Run Once)
+    # ------------------------------------------------
+
+    nltk.download('senseval')
+
+    # ------------------------------------------------
+    # Load Senseval Corpus for word "hard"
+    # ------------------------------------------------
+
+    instances = senseval.instances('hard.pos')
+
+    print("TOTAL INSTANCES :", len(instances))
+
+    # ------------------------------------------------
+    # Sense Meaning Dictionary
+    # ------------------------------------------------
+
+    sense_meaning = {
+
+        "HARD1": "Difficult",
+
+        "HARD2": "Physically Solid / Intense",
+
+        "HARD3": "Harsh or Severe"
+    }
+
+    # ------------------------------------------------
+    # Feature Extraction Function
+    # ------------------------------------------------
+
+    def extract_features(instance):
+
+        features = {}
+
+        # Extract context words
+        context_words = []
+
+        for item in instance.context:
+
+            word = item[0]
+
+            if isinstance(word, str):
+                context_words.append(word.lower())
+
+        # Position of target word "hard"
+        target_index = instance.position
+
+        # Window words around target
+        window_size = 3
+
+        start = max(0, target_index - window_size)
+        end = min(len(context_words), target_index + window_size + 1)
+
+        surrounding_words = context_words[start:end]
+
+        # Create contextual features
+        for word in surrounding_words:
+
+            if word.isalpha():
+                features[f'contains({word})'] = True
+
+        return features
+
+    # ------------------------------------------------
+    # Prepare Dataset
+    # ------------------------------------------------
+
+    featuresets = []
+
+    for instance in instances:
+
+        features = extract_features(instance)
+
+        sense = instance.senses[0]
+
+        featuresets.append((features, sense))
+
+    # ------------------------------------------------
+    # Shuffle Dataset
+    # ------------------------------------------------
+
+    import random
+
+    random.shuffle(featuresets)
+
+    # ------------------------------------------------
+    # Train-Test Split
+    # ------------------------------------------------
+
+    train_size = int(len(featuresets) * 0.8)
+
+    train_set = featuresets[:train_size]
+    test_set = featuresets[train_size:]
+
+    # ------------------------------------------------
+    # Train Naive Bayes Classifier
+    # ------------------------------------------------
+
+    classifier = NaiveBayesClassifier.train(train_set)
+
+    # ------------------------------------------------
+    # (a) Accuracy
+    # ------------------------------------------------
+
+    acc = accuracy(classifier, test_set)
+
+    print("\nACCURACY")
+    print("-" * 70)
+
+    print(f"Accuracy = {acc:.2f}")
+
+    # ------------------------------------------------
+    # (b) Most Informative Features
+    # ------------------------------------------------
+
+    print("\nMOST INFORMATIVE FEATURES")
+    print("-" * 70)
+
+    classifier.show_most_informative_features(10)
+
+    # ------------------------------------------------
+    # (c) Predicted Sense
+    # ------------------------------------------------
+
+    print("\nPREDICTED SENSE")
+    print("-" * 70)
+
+    sentence = input("Enter a sentence containing the word 'hard': ").lower()
+
+    # Tokenize sentence
+    words = nltk.word_tokenize(sentence)
+
+    # Create Features
+    test_features = {}
+
+    for word in words:
+
+        if word.isalpha():
+            test_features[f'contains({word})'] = True
+
+    # Predict Sense
+    predicted_sense = classifier.classify(test_features)
+
+    # ------------------------------------------------
+    # Output
+    # ------------------------------------------------
+
+    print("\nSentence:")
+    print(sentence)
+
+    print("\nPredicted Sense Label:")
+    print(predicted_sense)
+
+    print("\nContextual Meaning:")
+    print(sense_meaning.get(predicted_sense, "Meaning Not Found"))
+
+    [nltk_data] Downloading package senseval to
+    [nltk_data]     C:\Users\dhruv\AppData\Roaming\nltk_data...
+    [nltk_data]   Package senseval is already up-to-date!
+
+    TOTAL INSTANCES : 4333
+
+    ACCURACY
+    ----------------------------------------------------------------------
+    Accuracy = 0.90
+
+    MOST INFORMATIVE FEATURES
+    ----------------------------------------------------------------------
+    Most Informative Features
+              contains(rock) = True            HARD3 : HARD1  =    102.7 : 1.0
+              contains(look) = True            HARD2 : HARD1  =     74.5 : 1.0
+             contains(cover) = True            HARD3 : HARD1  =     54.2 : 1.0
+              contains(line) = True            HARD2 : HARD1  =     45.4 : 1.0
+              contains(work) = True            HARD2 : HARD1  =     42.2 : 1.0
+          contains(evidence) = True            HARD2 : HARD1  =     35.9 : 1.0
+             contains(place) = True            HARD3 : HARD1  =     34.2 : 1.0
+                contains(it) = True            HARD1 : HARD3  =     33.2 : 1.0
+            contains(ground) = True            HARD3 : HARD1  =     28.0 : 1.0
+                contains(no) = True            HARD2 : HARD1  =     26.7 : 1.0
+
+    PREDICTED SENSE
+    ----------------------------------------------------------------------
+
+    Enter a sentence containing the word 'hard':  the rock is hard
+
+
+    Sentence:
+    the rock is hard
+
+    Predicted Sense Label:
+    HARD3
+
+    Contextual Meaning:
+    Harsh or Severe
