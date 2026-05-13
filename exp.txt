@@ -1,0 +1,623 @@
+Word tokenize + stem + lemma:
+
+!python -m spacy download en_core_web_sm
+
+import nltk
+import spacy
+from string import punctuation
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import WordNetLemmatizer
+from nltk import pos_tag
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+
+nlp = spacy.load("en_core_web_sm")
+ws = WordNetLemmatizer()
+
+def get_wordnet_pos(tag):
+    if tag.startswith("J"):
+        return wordnet.ADJ
+    elif tag.startswith("V"):
+        return wordnet.VERB
+    elif tag.startswith("N"):
+        return wordnet.NOUN
+    elif tag.startswith("R"):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN
+
+def clean_text(text):
+    tokens = word_tokenize(text)
+    print(tokens)
+    clean_text = [t for t in tokens if t not in stopwords.words("english") and t not in punctuation]
+    print(clean_text)
+
+    pos_tags = pos_tag(clean_text)
+    lemmatized_words = [ws.lemmatize(t,get_wordnet_pos(p)) for t,p in pos_tags]
+    print(lemmatized_words)
+
+    doc = nlp(text)
+
+    if len(doc.ents) == 0:
+        print("No entities found")
+    else :
+        for ent in doc.ents:
+            print(f"{ent.text:<20}\t{ent.label_:<10}\t{spacy.explain(ent.label_)}")
+
+print("Sample 1")
+clean_text("Microsoft CEO Satya Nadella visited India in January 2024.")
+print("\n"+"="*50 + "\n")
+
+print("Sample 2")
+clean_text("Apple launched the new iPhone in California on September 12.")
+print("\n"+"="*50 + "\n")
+
+print("Sample 3")
+clean_text("Prime Minister Narendra Modi addressed the UN General Assembly in New York.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NGram:
+
+import nltk
+from string import punctuation
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.util import ngrams
+
+from collections import Counter
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+text = "I am studying natural language processing. I am learning text processing techniques."
+print("Original Text:")
+print(text)
+
+tokens = word_tokenize(text.lower())
+print("\n1. Tokenization:")
+print(tokens)
+
+clean_tokens = [t for t in tokens if t not in stopwords.words("english") and t not in punctuation]
+print("\n2. After Stop Word Removal:")
+print(clean_tokens)
+
+ps = PorterStemmer()
+stemmed_tokens = [ps.stem(t) for t in clean_tokens]
+print("\n3. After Stemming:")
+print(stemmed_tokens)
+
+training_text = """
+I am studying natural language processing.
+I am learning natural language processing.
+I am studying machine learning.
+Natural language processing is interesting.
+"""
+
+tokens2 = word_tokenize(training_text.lower())
+clean2 = [t for t in tokens2 if t not in punctuation]
+print("\nTraining Tokens:")
+print(clean2)
+
+unigram_count = Counter(clean2)
+bigram_count = Counter(ngrams(clean2, 2))
+
+def calc_prob(sentence):
+    words = word_tokenize(sentence.lower())
+    clean_words = [t for t in words if t not in punctuation]
+    prob = 1.0
+    print("\nSentence:", sentence)
+    print("Bigrams:")
+    for pair in ngrams(clean_words, 2):
+        bp = bigram_count[pair] / unigram_count[pair[0]] if unigram_count[pair[0]] > 0 else 0
+        print(pair, "=", bp)
+        prob *= bp
+    return prob
+
+str1 = "I am studying natural language processing"
+prob = calc_prob(str1)
+print("\n4. Final Sentence Probability:")
+print(prob)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+edit distance:
+
+import nltk
+from string import punctuation
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+text = "I am studying natural language processing and learning text correction techniques."
+print("Original Text:")
+print(text)
+
+tokens = word_tokenize(text.lower())
+print("\n1. Tokenization:")
+print(tokens)
+
+clean_tokens = [t for t in tokens if t not in stopwords.words("english") and t not in punctuation]
+print("\n2. After Stop Word Removal:")
+print(clean_tokens)
+
+ps = PorterStemmer()
+stemmed_tokens = [ps.stem(t) for t in clean_tokens]
+print("\n3. After Stemming:")
+print(stemmed_tokens)
+
+def edit_distance(word1, word2):
+    m = len(word1)
+    n = len(word2)
+    dp = []
+    for i in range(m + 1):
+        row = []
+        for j in range(n + 1):
+            row.append(0)
+        dp.append(row)
+    for i in range(m + 1):
+        dp[i][0] = i
+    for j in range(n + 1):
+        dp[0][j] = j
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if word1[i - 1] == word2[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1]
+            else:
+                dp[i][j] = min(
+                    dp[i - 1][j],
+                    dp[i][j - 1],
+                    dp[i - 1][j - 1]
+                ) + 1
+    return dp[m][n]
+
+dictionary = [
+    "natural", "language", "processing", "learning",
+    "text", "correction", "techniques", "machine",
+    "computer", "science", "programming", "algorithm"
+]
+
+def correct_word(wrong_word):
+    best_word = ""
+    best_dist = 9999
+
+    for word in dictionary:
+        dist = edit_distance(wrong_word, word)
+        if dist < best_dist:
+            best_dist = dist
+            best_word = word
+
+    return best_word, best_dist
+
+wrong_word = "langauge"
+corrected, dist = correct_word(wrong_word)
+print("\n4. Edit Distance Spell Correction:")
+print("Wrong Word:", wrong_word)
+print("Corrected Word:", corrected)
+print("Minimum Edit Distance:", dist)
+
+wrong_sentence = "I am lerning natural langauge procesing"
+print("\nWrong Sentence:")
+print(wrong_sentence)
+
+wrong_tokens = word_tokenize(wrong_sentence.lower())
+corrected_sentence = []
+for t in wrong_tokens:
+    if t in punctuation:
+        corrected_sentence.append(t)
+    elif t in dictionary:
+        corrected_sentence.append(t)
+    else:
+        corrected, dist = correct_word(t)
+        corrected_sentence.append(corrected)
+
+print("\nCorrected Sentence:")
+print(" ".join(corrected_sentence))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+filtering + uni bi tri:
+
+import nltk
+from string import punctuation
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.util import ngrams
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+text = "Natural Language Processing is an important field of Artificial Intelligence. It helps computers understand human language."
+print("Original Text:")
+print(text)
+
+tokens = word_tokenize(text.lower())
+print("\n1. Tokenization:")
+print(tokens)
+
+clean_tokens = [t for t in tokens if t not in stopwords.words("english")]
+print("\n2. After Stop Word Removal:")
+print(clean_tokens)
+
+filtered_tokens = [t for t in clean_tokens if t not in punctuation and t.isalpha()]
+print("\n3. After Filtration:")
+print(filtered_tokens)
+
+unigrams = list(ngrams(filtered_tokens, 1))
+bigrams = list(ngrams(filtered_tokens, 2))
+trigrams = list(ngrams(filtered_tokens, 3))
+
+print("\n4. Unigrams:")
+print(unigrams)
+
+print("\n5. Bigrams:")
+print(bigrams)
+
+print("\n6. Trigrams:")
+print(trigrams)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+morpho + word gen:
+
+import nltk
+from string import punctuation
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk import pos_tag
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+
+ws = WordNetLemmatizer()
+ps = PorterStemmer()
+
+def get_wordnet_pos(tag):
+    if tag.startswith("J"):
+        return wordnet.ADJ
+    elif tag.startswith("V"):
+        return wordnet.VERB
+    elif tag.startswith("N"):
+        return wordnet.NOUN
+    elif tag.startswith("R"):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN
+
+def generate_words(base_word):
+    forms = []
+    forms.append(base_word)
+    if base_word.endswith("y"):
+        forms.append(base_word[:-1] + "ies")
+    else:
+        forms.append(base_word + "s")
+    if base_word.endswith("e"):
+        forms.append(base_word + "d")
+    else:
+        forms.append(base_word + "ed")
+    if base_word.endswith("e"):
+        forms.append(base_word[:-1] + "ing")
+    else:
+        forms.append(base_word + "ing")
+    return forms
+
+def morphological_analysis(text):
+    print("Original Text:")
+    print(text)
+
+    tokens = word_tokenize(text.lower())
+    print("\n1. Tokenization:")
+    print(tokens)
+
+    clean_tokens = [t for t in tokens if t not in stopwords.words("english") and t not in punctuation]
+    print("\n2. After Stop Word Removal:")
+    print(clean_tokens)
+
+    pos_tags = pos_tag(clean_tokens)
+    print("\n3. Morphological Analysis:")
+    print("Word\t\tPOS\t\tStem\t\tLemma")
+    print("-" * 50)
+    lemmas = []
+    for word, tag in pos_tags:
+        stem = ps.stem(word)
+        lemma = ws.lemmatize(word, get_wordnet_pos(tag))
+        lemmas.append(lemma)
+        print(f"{word:<12}\t{tag:<8}\t{stem:<10}\t{lemma}")
+
+    print("\n4. Word Generation:")
+    for lemma in lemmas:
+        generated = generate_words(lemma)
+        print(lemma, "->", generated)
+
+morphological_analysis("The students are studying and writing programs carefully.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+final 7+8 exp stem lemma pos:
+
+import nltk
+from string import punctuation
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk import pos_tag
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+
+ws = WordNetLemmatizer()
+ps = PorterStemmer()
+
+def get_wordnet_pos(tag):
+    if tag.startswith("J"):
+        return wordnet.ADJ
+    elif tag.startswith("V"):
+        return wordnet.VERB
+    elif tag.startswith("N"):
+        return wordnet.NOUN
+    elif tag.startswith("R"):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN
+
+def text_processing(text):
+    print("Original Text:")
+    print(text)
+
+    tokens = word_tokenize(text.lower())
+    print("\n1. Tokenization:")
+    print(tokens)
+
+    clean_tokens = [t for t in tokens if t not in stopwords.words("english") and t not in punctuation]
+    print("\n2. After Stop Word Removal:")
+    print(clean_tokens)
+
+    stemmed_tokens = [ps.stem(t) for t in clean_tokens]
+    print("\n3. Stemming:")
+    print(stemmed_tokens)
+
+    pos_tags = pos_tag(clean_tokens)
+    lemmatized_words = [ws.lemmatize(t, get_wordnet_pos(p)) for t, p in pos_tags]
+    print("\n4. Lemmatization:")
+    print(lemmatized_words)
+
+    print("\n5. POS Tagging:")
+    print(pos_tags)
+
+    print("\nFinal Output Table:")
+    print("Word\t\tStem\t\tLemma\t\tPOS")
+    print("-" * 50)
+    for i in range(len(clean_tokens)):
+        print(f"{clean_tokens[i]:<12}\t{stemmed_tokens[i]:<10}\t{lemmatized_words[i]:<10}\t{pos_tags[i][1]}")
+
+text_processing("The students are studying natural language processing and writing programs carefully.")
+
+
+
+
+
+
+
+
+
+
+
+WSD:
+
+import nltk
+import random
+
+from nltk.corpus import senseval
+from nltk.classify import NaiveBayesClassifier
+from nltk.classify.util import accuracy
+from nltk import word_tokenize, pos_tag
+
+nltk.download('senseval')
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+
+instances = senseval.instances('hard.pos')
+print("Total instances:", len(instances))
+
+def get_features(context, position):
+    features = {}
+    if position > 0:
+        features["previous_word"] = context[position - 1][0].lower()
+    else:
+        features["previous_word"] = "START"
+    if position < len(context) - 1:
+        features["next_word"] = context[position + 1][0].lower()
+    else:
+        features["next_word"] = "END"
+    window = context[max(0, position - 2): position] + context[position + 1: position + 3]
+    for word in window:
+        features["contains_" + word[0].lower()] = True
+    return features
+
+featuresets = []
+for instance in instances:
+    features = get_features(instance.context, instance.position)
+    sense = instance.senses[0]
+    featuresets.append((features, sense))
+random.shuffle(featuresets)
+
+split = int(0.8 * len(featuresets))
+train_set = featuresets[:split]
+test_set = featuresets[split:]
+
+classifier = NaiveBayesClassifier.train(train_set)
+
+print("\n1. Accuracy:")
+print(round(accuracy(classifier, test_set) * 100, 2), "%")
+
+print("\n2. Most Informative Features:")
+classifier.show_most_informative_features(10)
+
+def predict_sense(sentence):
+    tokens = word_tokenize(sentence)
+    tagged_tokens = pos_tag(tokens)
+    position = -1
+    for i, word in enumerate(tokens):
+        if word.lower() == "hard":
+            position = i
+            break
+    if position == -1:
+        print("The word 'hard' is not found in the sentence.")
+        return
+    features = get_features(tagged_tokens, position)
+    predicted = classifier.classify(features)
+    print("\n3. Predicted Sense:")
+    print("Sentence:", sentence)
+    print("Predicted Sense:", predicted)
+
+predict_sense("The exam was very hard for the students.")
+predict_sense("The stone surface is hard.")
+predict_sense("He worked hard to finish the project.")
+
+
+
+
+
+
+
+
+
+
+
+
+vv filter:
+
+import re
+
+raw_text = """
+Wow!!! NLP is amazing 😊😊
+Visit https://example.com for more info.
+Email us at support@abc.com
+Price is 500₹ only!!!
+#AI #NLP
+"""
+print("Original Text:")
+print(raw_text)
+
+# Remove URLs
+clean_text = re.sub(r'http\S+|www\S+', '', raw_text)
+
+# Remove Email IDs
+clean_text = re.sub(r'\S+@\S+', '', clean_text)
+
+# Remove Emojis / Non ASCII Characters
+clean_text = clean_text.encode('ascii', 'ignore').decode('ascii')
+
+# Remove Hashtag Symbol
+clean_text = re.sub(r'#', '', clean_text)
+
+# Remove Special Characters
+clean_text = re.sub(r'[^a-zA-Z\s]', ' ', clean_text)
+
+# Convert Multiple Spaces to Single Space
+clean_text = re.sub(r'\s+', ' ', clean_text)
+
+# Convert to Lowercase
+clean_text = clean_text.lower()
+
+print("Cleaned Text:")
+print(clean_text)
+
+
+
+
+
+
+
