@@ -670,10 +670,6 @@ for o in organizations:
 for l in locations:
     print(f"{l:<25}GPE")
 
-print("\n===================================")
-print("5. Extracted Skills")
-print("===================================")
-
 skills_list = [
 
     "Python",
@@ -696,7 +692,8 @@ for skill in skills_list:
 
 for skill in found_skills:
 
-    print(skill)
+    print(f"{skill:<25}SKILL")
+
 
 
 
